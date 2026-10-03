@@ -25,6 +25,7 @@
             </div>
             <div class="flex gap-3">
                 <a href="index.html" class="btn-secondary px-4 py-2 rounded-xl font-semibold">Vista pública</a>
+                <button id="logout-btn" class="btn-secondary px-4 py-2 rounded-xl font-semibold">Cerrar sesión</button>
                 <button id="save-all" class="btn-primary px-4 py-2 rounded-xl font-semibold">Guardar cambios</button>
             </div>
         </div>
@@ -86,6 +87,15 @@
 
     <script>
         const storageKey = 'srtStoreState';
+
+        function requireLogin() {
+            const loggedIn = localStorage.getItem('srt_admin_logged_in');
+            if (loggedIn !== 'true') {
+                window.location.href = 'login.html';
+            }
+        }
+
+        requireLogin();
 
         const defaultState = {
             brandName: 'SRT STORE',
@@ -249,6 +259,11 @@
             window.location.href = 'index.html';
         });
 
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('srt_admin_logged_in');
+            window.location.href = 'login.html';
+        });
+
         document.addEventListener('click', (event) => {
             const target = event.target;
             if (target.matches('[data-type="remove-product"]')) {
@@ -272,3 +287,53 @@
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
