@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel Admin - SRT STORE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #0f172a; color: #e2e8f0; }
+        .panel-card { background: #111827; border: 1px solid #374151; border-radius: 18px; }
+        .input-dark { background: #0b1220; border: 1px solid #334155; color: #f8fafc; }
+        .input-dark:focus { outline: none; border-color: #ef4444; box-shadow: 0 0 0 2px rgba(239,68,68,.2); }
+        .btn-primary { background: #ef4444; color: white; }
+        .btn-primary:hover { background: #dc2626; }
+        .btn-secondary { background: #1e293b; border: 1px solid #475569; color: white; }
+        .btn-secondary:hover { background: #334155; }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 py-10">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <p class="text-sm uppercase text-red-400 tracking-widest">Admin</p>
+                <h1 class="text-3xl font-extrabold">Panel de configuración</h1>
+            </div>
+            <div class="flex gap-3">
+                <a href="index.html" class="btn-secondary px-4 py-2 rounded-xl font-semibold">Vista pública</a>
+                <button id="save-all" class="btn-primary px-4 py-2 rounded-xl font-semibold">Guardar cambios</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <section class="panel-card p-6">
+                <h2 class="text-xl font-bold mb-4">Configuración general</h2>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm mb-2 text-slate-300">Nombre de la tienda</label>
+                        <input id="brandName" type="text" class="input-dark w-full rounded-xl px-3 py-2" value="SRT STORE" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm mb-2 text-slate-300">Enlace de Discord</label>
+                        <input id="discordLink" type="text" class="input-dark w-full rounded-xl px-3 py-2" value="https://discord.gg/tu-enlace-aqui" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm mb-2 text-slate-300">Título principal</label>
+                        <input id="heroTitle" type="text" class="input-dark w-full rounded-xl px-3 py-2" value="Eleva tu experiencia en FiveM" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm mb-2 text-slate-300">Subtítulo principal</label>
+                        <textarea id="heroSubtitle" rows="3" class="input-dark w-full rounded-xl px-3 py-2">Encuentra menús exclusivos, herramientas de optimización, bypass y spoopers con entrega inmediata y total confiabilidad.</textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm mb-2 text-slate-300">Título de contacto</label>
+                        <input id="contactTitle" type="text" class="input-dark w-full rounded-xl px-3 py-2" value="¿Listo para hacer tu pedido?" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm mb-2 text-slate-300">Texto de contacto</label>
+                        <textarea id="contactSubtitle" rows="3" class="input-dark w-full rounded-xl px-3 py-2">Las ventas y la atención al cliente se realizan de manera centralizada en nuestro servidor oficial de Discord.</textarea>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel-card p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold">Productos</h2>
+                    <button id="add-product" class="btn-primary px-3 py-2 rounded-xl text-sm font-semibold">+ Añadir</button>
+                </div>
+                <div id="products-list" class="space-y-4"></div>
+            </section>
+        </div>
+
+        <section class="panel-card p-6 mt-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold">Ventajas / Beneficios</h2>
+                <button id="add-feature" class="btn-primary px-3 py-2 rounded-xl text-sm font-semibold">+ Añadir</button>
+            </div>
+            <div id="features-list" class="space-y-4"></div>
+        </section>
+    </div>
+
+    <script>
+        const storageKey = 'srtStoreState';
+
+        const defaultState = {
+            brandName: 'SRT STORE',
+            discordLink: 'https://discord.gg/tu-enlace-aqui',
+            heroTitle: 'Eleva tu experiencia en FiveM',
+            heroSubtitle: 'Encuentra menús exclusivos, herramientas de optimización, bypass y spoopers con entrega inmediata y total confiabilidad.',
+            contactTitle: '¿Listo para hacer tu pedido?',
+            contactSubtitle: 'Las ventas y la atención al cliente se realizan de manera centralizada en nuestro servidor oficial de Discord.',
+            products: [
+                { name: 'Flame Menu', description: 'Máxima versatilidad, opciones avanzadas y rendimiento fluido en servidores.', icon: 'fa-solid fa-fire' },
+                { name: 'Vanity', description: 'Interfaz limpia, personalización única y alta estabilidad garantizada.', icon: 'fa-solid fa-wand-magic-sparkles' },
+                { name: 'Susano', description: 'Uno de los menús más potentes con funciones de alto nivel para usuarios exigentes.', icon: 'fa-solid fa-bolt' },
+                { name: 'X23 Gen Spoofer', description: 'Cambiador de HWID avanzado e indetectable para proteger tu identidad y evitar bans.', icon: 'fa-solid fa-shield-halved' },
+                { name: 'Bypass', description: 'Solución técnica de alto rendimiento para sortear restricciones específicas de servidores.', icon: 'fa-solid fa-key' },
+                { name: 'Lumia Menu', description: 'Excelente estabilidad, herramientas completas y soporte constante en cada parche.', icon: 'fa-solid fa-star' },
+                { name: 'Keyser Menu', description: 'Potencia pura con controles avanzados y funciones diseñadas para expertos.', icon: 'fa-solid fa-terminal' },
+                { name: 'TZ Menu', description: 'Exclusividad y rendimiento superior integrado con actualizaciones frecuentes.', icon: 'fa-solid fa-crown' }
+            ],
+            features: [
+                { title: 'Entrega Inmediata', text: 'Recibe tus keys o accesos automáticos en cuestión de minutos tras completar tu pago.', icon: 'fa-solid fa-bolt-lightning' },
+                { title: 'Soporte Técnico 24/7', text: 'Te orientamos paso a paso con la instalación y configuración de tus herramientas.', icon: 'fa-solid fa-headset' },
+                { title: 'Actualizaciones Constantes', text: 'Mantenemos todos nuestros productos al día con las nuevas versiones y parches.', icon: 'fa-solid fa-rotate' }
+            ]
+        };
+
+        function loadState() {
+            const saved = localStorage.getItem(storageKey);
+            if (!saved) return defaultState;
+            try {
+                return { ...defaultState, ...JSON.parse(saved) };
+            } catch (error) {
+                return defaultState;
+            }
+        }
+
+        function saveState(state) {
+            localStorage.setItem(storageKey, JSON.stringify(state));
+        }
+
+        function renderProducts() {
+            const state = loadState();
+            const container = document.getElementById('products-list');
+            container.innerHTML = state.products.map((product, index) => `
+                <div class="border border-slate-700 rounded-2xl p-4 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-semibold">Producto ${index + 1}</h3>
+                        <button data-type="remove-product" data-index="${index}" class="text-red-400 hover:text-red-300 text-sm">Eliminar</button>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1 text-slate-300">Nombre</label>
+                        <input data-product-field="name" data-index="${index}" value="${product.name}" class="input-dark w-full rounded-xl px-3 py-2" />
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1 text-slate-300">Descripción</label>
+                        <textarea data-product-field="description" data-index="${index}" rows="2" class="input-dark w-full rounded-xl px-3 py-2">${product.description}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1 text-slate-300">Icono (Font Awesome)</label>
+                        <input data-product-field="icon" data-index="${index}" value="${product.icon}" class="input-dark w-full rounded-xl px-3 py-2" />
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderFeatures() {
+            const state = loadState();
+            const container = document.getElementById('features-list');
+            container.innerHTML = state.features.map((feature, index) => `
+                <div class="border border-slate-700 rounded-2xl p-4 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-semibold">Beneficio ${index + 1}</h3>
+                        <button data-type="remove-feature" data-index="${index}" class="text-red-400 hover:text-red-300 text-sm">Eliminar</button>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1 text-slate-300">Título</label>
+                        <input data-feature-field="title" data-index="${index}" value="${feature.title}" class="input-dark w-full rounded-xl px-3 py-2" />
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1 text-slate-300">Texto</label>
+                        <textarea data-feature-field="text" data-index="${index}" rows="2" class="input-dark w-full rounded-xl px-3 py-2">${feature.text}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1 text-slate-300">Icono (Font Awesome)</label>
+                        <input data-feature-field="icon" data-index="${index}" value="${feature.icon}" class="input-dark w-full rounded-xl px-3 py-2" />
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function readCurrentStateFromInputs() {
+            const state = loadState();
+
+            state.brandName = document.getElementById('brandName').value || 'SRT STORE';
+            state.discordLink = document.getElementById('discordLink').value || 'https://discord.gg/tu-enlace-aqui';
+            state.heroTitle = document.getElementById('heroTitle').value || 'Eleva tu experiencia en FiveM';
+            state.heroSubtitle = document.getElementById('heroSubtitle').value || 'Encuentra menús exclusivos...';
+            state.contactTitle = document.getElementById('contactTitle').value || '¿Listo para hacer tu pedido?';
+            state.contactSubtitle = document.getElementById('contactSubtitle').value || 'Las ventas...';
+
+            const productInputs = document.querySelectorAll('[data-product-field]');
+            const productMap = {};
+            productInputs.forEach(input => {
+                const index = Number(input.dataset.index);
+                if (!productMap[index]) productMap[index] = {};
+                productMap[index][input.dataset.productField] = input.value;
+            });
+
+            state.products = Object.values(productMap).map(item => ({
+                name: item.name || 'Nuevo producto',
+                description: item.description || 'Descripción',
+                icon: item.icon || 'fa-solid fa-store'
+            }));
+
+            const featureInputs = document.querySelectorAll('[data-feature-field]');
+            const featureMap = {};
+            featureInputs.forEach(input => {
+                const index = Number(input.dataset.index);
+                if (!featureMap[index]) featureMap[index] = {};
+                featureMap[index][input.dataset.featureField] = input.value;
+            });
+
+            state.features = Object.values(featureMap).map(item => ({
+                title: item.title || 'Nuevo beneficio',
+                text: item.text || 'Texto',
+                icon: item.icon || 'fa-solid fa-star'
+            }));
+
+            return state;
+        }
+
+        function fillInputsFromState() {
+            const state = loadState();
+            document.getElementById('brandName').value = state.brandName;
+            document.getElementById('discordLink').value = state.discordLink;
+            document.getElementById('heroTitle').value = state.heroTitle;
+            document.getElementById('heroSubtitle').value = state.heroSubtitle;
+            document.getElementById('contactTitle').value = state.contactTitle;
+            document.getElementById('contactSubtitle').value = state.contactSubtitle;
+            renderProducts();
+            renderFeatures();
+        }
+
+        document.getElementById('add-product').addEventListener('click', () => {
+            const state = loadState();
+            state.products.push({ name: 'Nuevo producto', description: 'Escribe la descripción', icon: 'fa-solid fa-store' });
+            saveState(state);
+            fillInputsFromState();
+        });
+
+        document.getElementById('add-feature').addEventListener('click', () => {
+            const state = loadState();
+            state.features.push({ title: 'Nuevo beneficio', text: 'Escribe el texto del beneficio', icon: 'fa-solid fa-star' });
+            saveState(state);
+            fillInputsFromState();
+        });
+
+        document.getElementById('save-all').addEventListener('click', () => {
+            const nextState = readCurrentStateFromInputs();
+            saveState(nextState);
+            alert('Cambios guardados correctamente. Puedes revisar la vista pública.');
+            window.location.href = 'index.html';
+        });
+
+        document.addEventListener('click', (event) => {
+            const target = event.target;
+            if (target.matches('[data-type="remove-product"]')) {
+                const index = Number(target.dataset.index);
+                const state = loadState();
+                state.products.splice(index, 1);
+                saveState(state);
+                fillInputsFromState();
+            }
+
+            if (target.matches('[data-type="remove-feature"]')) {
+                const index = Number(target.dataset.index);
+                const state = loadState();
+                state.features.splice(index, 1);
+                saveState(state);
+                fillInputsFromState();
+            }
+        });
+
+        fillInputsFromState();
+    </script>
+</body>
+</html>
